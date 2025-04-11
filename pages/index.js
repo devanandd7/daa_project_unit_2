@@ -1,115 +1,116 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import Navbar from './navbar';
 
 export default function Home() {
+  const [capacity, setCapacity] = useState('');
+  const [items, setItems] = useState([{ name: '', weight: '', value: '' }]);
+  const [result, setResult] = useState(null);
+
+  const handleItemChange = (index, field, value) => {
+    const newItems = [...items];
+    newItems[index][field] = value;
+    setItems(newItems);
+  };
+
+  const addItem = () => {
+    setItems([...items, { name: '', weight: '', value: '' }]);
+  };
+
+  const removeItem = (index) => {
+    const newItems = items.filter((_, i) => i !== index);
+    setItems(newItems);
+  };
+
+  const solveKnapsack = async () => {
+    const validItems = items.filter(item => item.name && item.weight && item.value);
+
+    if (!capacity || validItems.length === 0) {
+      alert('Please enter a valid capacity and at least one item.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/solve_knapsack', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          capacity: parseInt(capacity),
+          items: validItems.map(item => ({
+            name: item.name,
+            weight: parseInt(item.weight),
+            value: parseInt(item.value)
+          }))
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || 'An error occurred.');
+        return;
+      }
+
+      const data = await response.json();
+      setResult(data);
+    } catch (err) {
+      alert('Failed to fetch result from the server.');
+      console.error(err);
+    }
+  };
+
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              pages/index.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    <>
+    <Navbar />
+    <motion.div className="bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 min-h-screen font-sans p-6 sm:p-10 md:p-12 lg:p-16 text-black" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}>
+      <motion.h1 className="text-3xl sm:text-4xl font-bold text-purple-700 text-center mb-10 drop-shadow-lg" initial={{ y: -50 }} animate={{ y: 0 }} transition={{ duration: 0.5 }}>
+        🎒 0/1 Knapsack Solver
+      </motion.h1>
+
+      <motion.div className="bg-white rounded-2xl shadow-xl p-6 mb-10 max-w-3xl mx-auto" whileHover={{ scale: 1.02 }}>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Knapsack Capacity</h2>
+        <input type="number" value={capacity} onChange={(e) => setCapacity(e.target.value)} min="1"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow focus:ring-2 focus:ring-purple-400 focus:outline-none" />
+      </motion.div>
+
+      <motion.div className="bg-white rounded-2xl shadow-xl p-6 mb-10 max-w-3xl mx-auto" whileHover={{ scale: 1.02 }}>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Items</h2>
+        {items.map((item, index) => (
+          <motion.div key={index} className="flex flex-col sm:flex-row gap-4 mb-4" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <input type="text" value={item.name} onChange={(e) => handleItemChange(index, 'name', e.target.value)} placeholder="Item Name"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg shadow focus:ring-purple-400 focus:outline-none" />
+            <input type="number" value={item.weight} onChange={(e) => handleItemChange(index, 'weight', e.target.value)} placeholder="Weight" min="0"
+              className="w-28 px-4 py-2 border border-gray-300 rounded-lg shadow focus:ring-purple-400 focus:outline-none" />
+            <input type="number" value={item.value} onChange={(e) => handleItemChange(index, 'value', e.target.value)} placeholder="Value" min="0"
+              className="w-28 px-4 py-2 border border-gray-300 rounded-lg shadow focus:ring-purple-400 focus:outline-none" />
+            <button onClick={() => removeItem(index)} className="bg-red-500 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg shadow transition-transform hover:scale-105">
+              Remove
+            </button>
+          </motion.div>
+        ))}
+        <button onClick={addItem} className="mt-4 bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg shadow transition-transform hover:scale-105">
+          ➕ Add Item
+        </button>
+      </motion.div>
+
+      <div className="flex justify-center mb-10">
+        <motion.button onClick={solveKnapsack} whileTap={{ scale: 0.95 }} className="bg-purple-600 hover:bg-purple-800 text-white font-bold py-3 px-8 rounded-lg shadow-lg text-lg transition-transform hover:scale-105">
+          🚀 Solve Knapsack
+        </motion.button>
+      </div>
+
+      {result && (
+        <motion.div id="results" className="bg-white rounded-2xl shadow-xl p-6 max-w-3xl mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Results</h2>
+          <p className="text-2xl text-green-600 mb-4">Optimal Value: <span className="font-bold">{result.optimal_value}</span></p>
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">Selected Items:</h3>
+          <ul className="list-disc list-inside">
+            {result.selected_items.map((item, index) => (
+              <li key={index} className="py-1 text-gray-700"><strong>{item.name}</strong> (Weight: {item.weight}, Value: {item.value})</li>
+            ))}
+          </ul>
+        </motion.div>
+      )}
+    </motion.div>
+    </>
   );
 }
