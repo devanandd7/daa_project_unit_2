@@ -13,7 +13,7 @@ const AboutPage = () => {
                 than or equal to a given capacity, and the total value is maximized.
             </p>
             <p className="text-gray-300 mb-4">
-                The "0/1" in the name indicates that you either take an entire item or leave it
+                The &quot;0/1&quot; in the name indicates that you either take an entire item or leave it
                 entirely; you cannot take a fraction of an item.
             </p>
             <p className="text-gray-300 mb-4">
@@ -44,7 +44,7 @@ const AboutPage = () => {
             <h3 className="text-2xl font-semibold text-white mb-4">Time Complexity:</h3>
             <p className="text-gray-300 mb-4">
                 The time complexity of the dynamic programming solution used here is O(n*C),
-                where 'n' is the number of items and 'C' is the knapsack capacity.
+                where &quot;n&quot; is the number of items and &quot;C&quot; is the knapsack capacity.
             </p>
         </div>
         </>
